@@ -20,6 +20,9 @@ class ArchivableMixin(models.Model):
 class Board(ArchivableMixin, models.Model):
     name = models.TextField(max_length=50, unique=True)
 
+    def __str__(self):
+        return '%s' % self.name
+
     class Meta:
         ordering = ('name',)
 

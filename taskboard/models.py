@@ -59,12 +59,12 @@ class Member(ArchivableMixin, models.Model):
         """
         De-assigning a member from his tasks prior to archiving.
         """
-        for card in Card.objects.filter(members_in=[object]):
+        for card in Card.objects.filter(members_in=[self]):
             card.members.remove(card)
         return super(Member, self).delete(using=using)
 
     def __str__(self):
-        return '%s' % self.name
+        return '$s: %s' % (self.pk, self.name)
 
     class Meta:
         ordering = ('name',)
@@ -87,8 +87,11 @@ class Card(ArchivableMixin, models.Model):
     due_date = models.DateField()
     order = models.IntegerField()
     column = models.ForeignKey('Column')
-    members = models.ManyToManyField('Member')
+    members = models.ManyToManyField('Member', related_name='cards')
     label = models.ForeignKey('Label')
+
+    def __str__(self):
+        return '$s: %s / %s / %s' % (self.pk, self.column.board, self.column, self.title)
 
     class Meta:
         ordering = ('order',)

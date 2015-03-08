@@ -1,9 +1,9 @@
 from rest_framework import generics
 from rest_framework.response import Response
 
-from taskboard.models import Board, Label, Member
+from taskboard.models import Board, Label, Member, Column
 from taskboard.serializers import BoardListSerializer, BoardSerializer, LabelSerializer, \
-    MemberListSerializer, MemberSerializer
+    MemberListSerializer, MemberSerializer, ColumnListSerializer, ColumnSerializer
 
 
 class BoardList(generics.ListCreateAPIView):
@@ -52,6 +52,30 @@ class MemberView(generics.RetrieveUpdateDestroyAPIView):
         instance = self.get_object()
         # Members can only be renamed. Ignore any other data (i.e. task list)
         data = {'name': request.data.get('name', instance.name)}
+        serializer = self.get_serializer(instance, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+
+class ColumnList(generics.ListCreateAPIView):
+    serializer_class = ColumnListSerializer
+
+    def get_queryset(self):
+        board_id = self.kwargs['board_id']
+        return Column.objects.filter(board=board_id)
+
+
+class ColumnView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Column.objects.all()
+    serializer_class = ColumnSerializer
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        # Columns can be renamed and reordered. Ignore any other data
+        # (i.e. assigning to different board)
+        data = {'title': request.data.get('title', instance.title),
+                'order': request.data.get('order', instance.order)}
         serializer = self.get_serializer(instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)

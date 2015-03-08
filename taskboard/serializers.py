@@ -38,3 +38,18 @@ class MemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Board
         fields = ('pk', 'name', 'cards')
+
+
+class ColumnListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Column
+        fields = ('pk', 'title', 'board', 'order', 'is_archived')
+
+
+class ColumnSerializer(serializers.ModelSerializer):
+    cards = serializers.StringRelatedField(many=True)
+
+    class Meta:
+        model = Column
+        fields = ('pk', 'title', 'board', 'order', 'is_archived', 'cards')

@@ -39,17 +39,17 @@ class Column(ArchivableMixin, models.Model):
     """
     Giving the project is in Python, List would've been a confusing name.
     """
-    name = models.TextField(max_length=50)
+    title = models.TextField(max_length=50)
     board = models.ForeignKey('Board', related_name='columns')
     order = models.IntegerField()
 
     def __str__(self):
-        return '%s' % self.name
+        return '%s: %s' % (self.pk, self.title)
 
     class Meta:
         ordering = ('order',)
         order_with_respect_to = 'board'
-        unique_together = ('name', 'board')
+        unique_together = ('title', 'board')
 
 
 class Member(ArchivableMixin, models.Model):
@@ -64,7 +64,7 @@ class Member(ArchivableMixin, models.Model):
         return super(Member, self).delete(using=using)
 
     def __str__(self):
-        return '$s: %s' % (self.pk, self.name)
+        return '%s: %s' % (self.pk, self.name)
 
     class Meta:
         ordering = ('name',)
@@ -86,7 +86,7 @@ class Card(ArchivableMixin, models.Model):
     description = models.TextField()
     due_date = models.DateField()
     order = models.IntegerField()
-    column = models.ForeignKey('Column')
+    column = models.ForeignKey('Column', related_name='cards')
     members = models.ManyToManyField('Member', related_name='cards')
     label = models.ForeignKey('Label')
 

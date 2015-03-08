@@ -13,9 +13,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Board',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
                 ('is_archived', models.BooleanField(default=False)),
-                ('name', models.TextField(unique=True, max_length=50)),
+                ('name', models.TextField(max_length=50, unique=True)),
             ],
             options={
                 'ordering': ('name',),
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Card',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
                 ('is_archived', models.BooleanField(default=False)),
                 ('title', models.TextField(max_length=50)),
                 ('description', models.TextField()),
@@ -40,11 +40,11 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Column',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
                 ('is_archived', models.BooleanField(default=False)),
-                ('name', models.TextField(max_length=50)),
+                ('title', models.TextField(max_length=50)),
                 ('order', models.IntegerField()),
-                ('board', models.ForeignKey(to='taskboard.Board')),
+                ('board', models.ForeignKey(to='taskboard.Board', related_name='columns')),
             ],
             options={
                 'ordering': ('order',),
@@ -54,21 +54,20 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Label',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
                 ('title', models.TextField(max_length=50)),
-                ('board', models.ForeignKey(to='taskboard.Board')),
+                ('board', models.ForeignKey(to='taskboard.Board', related_name='labels')),
             ],
             options={
-                'ordering': ('title',),
             },
             bases=(models.Model,),
         ),
         migrations.CreateModel(
             name='Member',
             fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False, auto_created=True, verbose_name='ID')),
+                ('id', models.AutoField(primary_key=True, auto_created=True, serialize=False, verbose_name='ID')),
                 ('is_archived', models.BooleanField(default=False)),
-                ('name', models.TextField(unique=True, max_length=50)),
+                ('name', models.TextField(max_length=50, unique=True)),
             ],
             options={
                 'ordering': ('name',),
@@ -79,13 +78,9 @@ class Migration(migrations.Migration):
             name='label',
             unique_together=set([('title', 'board')]),
         ),
-        migrations.AlterOrderWithRespectTo(
-            name='label',
-            order_with_respect_to='board',
-        ),
         migrations.AlterUniqueTogether(
             name='column',
-            unique_together=set([('name', 'board')]),
+            unique_together=set([('title', 'board')]),
         ),
         migrations.AlterOrderWithRespectTo(
             name='column',
@@ -94,7 +89,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='card',
             name='column',
-            field=models.ForeignKey(to='taskboard.Column'),
+            field=models.ForeignKey(to='taskboard.Column', related_name='cards'),
             preserve_default=True,
         ),
         migrations.AddField(
@@ -106,7 +101,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='card',
             name='members',
-            field=models.ManyToManyField(to='taskboard.Member'),
+            field=models.ManyToManyField(to='taskboard.Member', related_name='cards'),
             preserve_default=True,
         ),
         migrations.AlterOrderWithRespectTo(

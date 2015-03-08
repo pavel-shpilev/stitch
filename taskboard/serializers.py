@@ -11,8 +11,8 @@ class BoardListSerializer(serializers.ModelSerializer):
 
 
 class BoardSerializer(serializers.ModelSerializer):
-    columns = serializers.PrimaryKeyRelatedField(many=True, queryset=Column.objects.all())
-    labels = serializers.PrimaryKeyRelatedField(many=True, queryset=Label.objects.all())
+    columns = serializers.StringRelatedField(many=True)
+    labels = serializers.StringRelatedField(many=True)
 
     class Meta:
         model = Board

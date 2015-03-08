@@ -3,9 +3,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
-LABELS_PER_BOARD = 6
-
-
 class ArchivableMixin(models.Model):
     """
     Replaces delete operation with archiving.
@@ -31,8 +28,8 @@ class Board(ArchivableMixin, models.Model):
 def create_labels(sender, instance, created, **kwargs):
     """Create labels whenever a board object is created."""
     if created:
-        for n in range(LABELS_PER_BOARD):
-            Label.objects.get_or_create(title='Label {}'.format(n+1), board=instance)
+        for n in range(6):
+            Label.objects.get_or_create(title='Label %s' % str(n+1), board=instance)
 
 
 class Column(ArchivableMixin, models.Model):
@@ -40,8 +37,11 @@ class Column(ArchivableMixin, models.Model):
     Giving the project is in Python, List would've been a confusing name.
     """
     name = models.TextField(max_length=50)
-    board = models.ForeignKey('Board')
+    board = models.ForeignKey('Board', related_name='columns')
     order = models.IntegerField()
+
+    def __str__(self):
+        return '%s' % self.name
 
     class Meta:
         ordering = ('order',)
@@ -60,13 +60,19 @@ class Member(ArchivableMixin, models.Model):
             card.members.remove(card)
         return super(Member, self).delete(using=using)
 
+    def __str__(self):
+        return '%s' % self.name
+
     class Meta:
         ordering = ('name',)
 
 
 class Label(models.Model):
     title = models.TextField(max_length=50)
-    board = models.ForeignKey('Board')
+    board = models.ForeignKey('Board', related_name='labels')
+
+    def __str__(self):
+        return '%s' % self.title
 
     class Meta:
         ordering = ('title',)

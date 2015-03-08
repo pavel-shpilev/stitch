@@ -75,11 +75,9 @@ class Label(models.Model):
     board = models.ForeignKey('Board', related_name='labels')
 
     def __str__(self):
-        return '%s' % self.title
+        return '%s: %s' % (self.pk, self.title)
 
     class Meta:
-        ordering = ('title',)
-        order_with_respect_to = 'board'
         unique_together = ('title', 'board')
 
 

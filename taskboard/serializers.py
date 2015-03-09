@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from taskboard.models import Board, Column, Label, Member
+from taskboard.models import Board, Column, Label, Member, Card
 
 
 class BoardListSerializer(serializers.ModelSerializer):
@@ -53,3 +53,17 @@ class ColumnSerializer(serializers.ModelSerializer):
     class Meta:
         model = Column
         fields = ('pk', 'title', 'board', 'order', 'is_archived', 'cards')
+
+
+class CardListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Card
+        fields = ('pk', 'title', 'column', 'order', 'label', 'members')
+
+
+class CardSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Column
+        fields = ('pk', 'title', 'description', 'due_date', 'column', 'order', 'label', 'members', 'is_archived')

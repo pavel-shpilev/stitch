@@ -83,15 +83,17 @@ class Label(models.Model):
 
 class Card(ArchivableMixin, models.Model):
     title = models.TextField(max_length=50)
-    description = models.TextField()
-    due_date = models.DateField()
+    description = models.TextField(blank=True, null=True)
+    due_date = models.DateField(blank=True, null=True)
     order = models.IntegerField()
     column = models.ForeignKey('Column', related_name='cards')
     members = models.ManyToManyField('Member', related_name='cards')
     label = models.ForeignKey('Label')
 
     def __str__(self):
-        return '$s: %s / %s / %s' % (self.pk, self.column.board, self.column, self.title)
+        return '%s: %s / %s / %s' % (
+            self.pk, self.column.board.name, self.column.title, self.title
+        )
 
     class Meta:
         ordering = ('order',)

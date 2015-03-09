@@ -1,9 +1,10 @@
 from rest_framework import generics
 from rest_framework.response import Response
 
-from taskboard.models import Board, Label, Member, Column
+from taskboard.models import Board, Label, Member, Column, Card
 from taskboard.serializers import BoardListSerializer, BoardSerializer, LabelSerializer, \
-    MemberListSerializer, MemberSerializer, ColumnListSerializer, ColumnSerializer
+    MemberListSerializer, MemberSerializer, ColumnListSerializer, ColumnSerializer, \
+    CardListSerializer, CardSerializer
 
 
 class BoardList(generics.ListCreateAPIView):
@@ -76,6 +77,39 @@ class ColumnView(generics.RetrieveUpdateDestroyAPIView):
         # (i.e. assigning to different board)
         data = {'title': request.data.get('title', instance.title),
                 'order': request.data.get('order', instance.order)}
+        serializer = self.get_serializer(instance, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
+
+
+class CardList(generics.ListCreateAPIView):
+    serializer_class = CardListSerializer
+
+    def get_queryset(self):
+        column_id = self.kwargs['column_id']
+        return Card.objects.filter(column=column_id)
+
+
+class CardView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Card.objects.all()
+    serializer_class = CardSerializer
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        data = request.data
+
+        # Restrict cards form moving across the boards and assigning another boards' labels.
+        column = Column.objects.get(data.get('column'))
+        if not column or column.board != instance.column.board:
+            del data['column']
+        label = Label.objects.get(data.get('label'))
+        if not label or label.board != instance.label.board:
+            del data['label']
+        # Archiving is done via deleting.
+        if 'is_archived' in data:
+            del data['is_archived']
+
         serializer = self.get_serializer(instance, data=data, partial=True)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
